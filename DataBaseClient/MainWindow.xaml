@@ -1,0 +1,196 @@
+﻿<Window x:Class="DataBaseClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:DataBaseClient"
+        Title="MainWindow" Height="800" Width="900" ResizeMode="CanMinimize">
+    <!--Подключаем файл ресурсов-->
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ResourceDictionary.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <local:BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+            <local:BooleanNegationConverter x:Key="BooleanNegation"/>
+            <local:RadioButtonConverter x:Key="RadioButtonConverter"/>
+            <local:StringToBoolConverter x:Key="StringToBool"/>
+            <Style x:Key="ListSchemeStyle" TargetType="ListBoxItem">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <Border x:Name="border">
+                                <ContentPresenter></ContentPresenter>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="border"  Property="Background" Value="Transparent"></Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <DockPanel>
+        <!--Формируем визуальное содержимое окна-->
+        <ContentControl Name="Setting" DockPanel.Dock="Top" HorizontalAlignment="Stretch" DataContext="{Binding SettingsConnectDB}">
+        <ScrollViewer CanContentScroll="True" PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Border Margin="3">
+                    <Grid VerticalAlignment="Top" IsEnabled="{Binding IsConnect, Converter={StaticResource BooleanNegation}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="100"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="Auto" MinWidth="100"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Content="Сервер"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding HostName, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                    <Label Grid.Row="1" Grid.Column="0" Content="База Данных"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NameDB, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                    <Label Grid.Row="0" Grid.Column="3" Content="Логин"/>
+                    <TextBox Grid.Row="0" Grid.Column="4" Text="{Binding User, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                    <Label Grid.Row="1" Grid.Column="3" Content="Пароль"/>
+                    <TextBox Grid.Row="1" Grid.Column="4" Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                        <RadioButton Grid.Row="2" Grid.Column="0" Content="SQL"  GroupName="DBType" 
+                     IsChecked="{Binding CurentTypeDB, Mode=TwoWay, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static local:TypeDB.SQL}}" />
+                        <RadioButton Grid.Row="3" Grid.Column="0" Content="Oracle" GroupName="DBType" 
+                     IsChecked="{Binding CurentTypeDB, Mode=TwoWay, Converter={StaticResource RadioButtonConverter}, ConverterParameter={x:Static local:TypeDB.Oracle}}" />
+                                 
+                           <!--     
+
+                        <Label Grid.Row="2" Grid.Column="3" Content="{x:Static props:Translator.Login_in_reports}"/>
+                            <TextBox Grid.Row="2" Grid.Column="4" Text="{Binding ReportLoginMask, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>-->
+                </Grid>
+            </Border>
+        </ScrollViewer>
+    </ContentControl>
+
+        <ContentControl Name="Selection2" HorizontalAlignment="Stretch" DockPanel.Dock="Top">
+            <ScrollViewer CanContentScroll="True" PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <Border Margin="3">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="350" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="500" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="50" />
+                            <RowDefinition Height="100*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <!--Отображаем древовидную структуру-->
+                        <StackPanel Grid.Row="0" Grid.Column="3">
+                            <Button Content="Новое соединение" Margin="5" Command="{Binding NewConnectDBCommand}" IsEnabled="{Binding SettingsConnectDB.IsConnect }"/>
+                            <Button Content="Соединить" Margin="5" Command="{Binding ConnectDBCommand}" IsEnabled="{Binding SettingsConnectDB.ValidConnect}" ToolTip="Для соединения необходимо ввести значение всех параметров"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="0">
+                            <Button Content="Добавить таблицу" Margin="5" Command="{Binding AddNewTableCommand}" IsEnabled="{Binding CurentSchemeName, Converter={StaticResource StringToBool}}"/>
+                            <Button Content="Добавить колонки" Margin="5" Command="{Binding AddNewColumnsCommand}" IsEnabled="{Binding CurentTableName, Converter={StaticResource StringToBool}}"/>
+                            <Button Content="Удалить таблицу" Margin="5" Command="{Binding DropTableCommand}" IsEnabled="{Binding CurentTableName, Converter={StaticResource StringToBool}}"/>
+                            <Button Content="Удалить колонки" Margin="5" Command="{Binding DeleteColumnsCommand}" IsEnabled="{Binding CurentTableName, Converter={StaticResource StringToBool}}"/>
+                        </StackPanel>
+                        <Grid Grid.Row="1" Grid.ColumnSpan="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Content="Схема"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" IsEnabled="False" Text="{Binding CurentSchemeName, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" HorizontalAlignment="Stretch"/>
+                            <Label Grid.Row="0" Grid.Column="3" Content="Таблица"/>
+                            <TextBox Grid.Row="0" Grid.Column="4" IsEnabled="False" Text="{Binding CurentTableName, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                       
+                    </Grid>
+                </Border>
+            </ScrollViewer>
+        </ContentControl>
+
+        <ContentControl Name="Selection1" HorizontalAlignment="Stretch" DockPanel.Dock="Bottom" VerticalAlignment="Stretch">
+        <ScrollViewer CanContentScroll="True" PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Border Margin="3">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="350" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="520" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                            <RowDefinition Height="10" />
+                            <RowDefinition Height="10" />
+                            <RowDefinition Height="100*" />
+                            <RowDefinition Height="Auto" />
+
+                        </Grid.RowDefinitions>
+
+                        <ListBox ItemsSource="{Binding SchemeCollection}" Margin="2"  Grid.Row="2" Grid.Column="0" ItemContainerStyle="{StaticResource ListSchemeStyle}" >
+                        <ListBox.ItemTemplate >
+                            <DataTemplate >
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="+" HorizontalAlignment="Center" Height="20" Margin="0,0,8,8" VerticalAlignment="Center" Width="25" Command="{Binding ChandgeVisibleListTableCommand}"/>
+                                            <TextBlock Text="{Binding NameScheme}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+                                            <CheckBox  IsThreeState="False" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="{Binding IsSelect}" Height="20"  Width="20" IsEnabled="False"/>
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <ListBox ItemsSource="{Binding TableInDB}"  MaxHeight="300" Width="300" SelectedItem="{Binding SelectedTableDB}" Visibility="{Binding IsVisibleListTable, Converter={StaticResource BoolToVisibility}}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding NameTable}"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <!--Отображаем примечания для выбранного в иерархии элемента-->
+
+                        <GridSplitter Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2"/>
+                            <DataGrid Grid.Column="2" Margin="2" Grid.Row="2" ItemsSource="{Binding CurentTable}" IsReadOnly="True" HorizontalAlignment="Stretch"/>
+
+                                <!--Предоставляем пользователю выбрать интересующий его источник данных. Данный блок обязательно должен размещаться ПОСЛЕ XAML-разметки, в которой определён
+    элемент treeStructure. Это требование обусловлено тем, что XAML-разметка элементов RadioButton содержит в себе регистрацию
+    события Checked, в теле которого, в свою очередь присутствует код, использующий элемент treeStructure, а по правилам XAML-документов, нельзя использовать элемент
+    раньше, чем он будет определён-->
+                    <!-- <GroupBox Header="Источник данных" Margin="2">
+            <StackPanel Margin="2">
+                <RadioButton Name="rbMSSQL" Content="База данных MS SQL Server" IsChecked="True" Checked="Change_DataSource"/>
+                <RadioButton Name="rbOracle" Content="База данных Oracle" IsChecked="False" Checked="Change_DataSource"/>
+            </StackPanel>
+        </GroupBox> -->
+                </Grid>
+            </Border>
+        </ScrollViewer>
+    </ContentControl>
+        </DockPanel>
+
+
+</Window>
